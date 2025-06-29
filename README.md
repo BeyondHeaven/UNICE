@@ -1,9 +1,10 @@
 # UNICE
+Code of the paper "UNICE: Training A Universal Image Contrast Enhancer"
+This is the **exposure control** branch.
+For the **fusion** functionality, please switch to the `fusion` branch.
 
-This is the **exposure control** branch. For the **fusion** functionality, please switch to the `fusion` branch.
-
-## 📦 Environment Setup
-
+🔗 **Pre-trained weights** are available at:
+[https://pan.baidu.com/s/1wlJN-r1fYt_KtaHbGrpo3g?pwd=ve2p](https://pan.baidu.com/s/1wlJN-r1fYt_KtaHbGrpo)
 To set up the environment, use the provided `environment.yaml` file:
 
 ```bash
@@ -40,7 +41,7 @@ To test the model with different exposure values, use the following script:
 #!/bin/bash
 
 # Define the exposure values
-exposures=(0.2 0.5 0.8)
+exposures=(0.25 0.5 0.75)
 
 # Loop through each exposure value
 for exposure in "${exposures[@]}"; do
