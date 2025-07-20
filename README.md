@@ -1,17 +1,20 @@
 # UNICE
-Code of the paper "UNICE: Training A Universal Image Contrast Enhancer"
-This is the **exposure control** branch.
+Code for the paper "UNICE: Training A Universal Image Contrast Enhancer"
+
+This repository contains the **exposure control** branch.
 For the **fusion** functionality, please switch to the `fusion` branch.
 
-🔗 **Pre-trained weights** are available at:
-[https://pan.baidu.com/s/1wlJN-r1fYt_KtaHbGrpo3g?pwd=ve2p](https://pan.baidu.com/s/1wlJN-r1fYt_KtaHbGrpo)
+## 🌟 Overview
+The core idea of this method is to use a multi-exposure fusion sequence as supervision signals, generate a sequence from a single 8-bit image, and then perform multi-exposure fusion.
+<img src="img/method_cmp.png" alt="Comparison with previous methods" width="600">
+
+## 🚀 Training
+
 To set up the environment, use the provided `environment.yaml` file:
 
 ```bash
 conda env create -f environment.yaml
 ```
-
-## 🚀 Training
 
 To train the model, run the following command:
 
@@ -28,32 +31,31 @@ CUDA_VISIBLE_DEVICES=1 ../miniconda3/envs/img2img-turbo/bin/python src/train_pix
   --tracker_project_name "pix2pix_turbo_exposure"
 ```
 
-> **Note:**
+> GPU Memory requirements:
 > On a Tesla A100 40GB GPU:
 > - Batch size 1 requires ~19561MiB
 > - Batch size 2 requires ~34853MiB
 
 ## 🧪 Testing
 
+🔗 **Pre-trained weights** are available at [huggingface.](https://huggingface.co/lahaina/unice/tree/main/checkpoints)
+
 To test the model with different exposure values, use the following script:
 
 ```bash
 #!/bin/bash
 
-# Define the exposure values
-exposures=(0.25 0.5 0.75)
+# Define the exposure value
+exposure=0.5
+output_dir="output/$exposure"
 
-# Loop through each exposure value
-for exposure in "${exposures[@]}"; do
-    output_dir="output/$exposure"
+CUDA_VISIBLE_DEVICES=5 ../miniconda3/envs/img2img-turbo/bin/python src/inference.py \
+--model_path "checkpoints/exposure.pkl" \
+--input_dir /local/mnt/workspace/ruodcui/code/adaptive_3dlut/data/BAID512/input/ \
+--output_dir $output_dir \
+--prompt "exposure control" \
+--exposure $exposure
 
-    CUDA_VISIBLE_DEVICES=5 ../miniconda3/envs/img2img-turbo/bin/python src/inference.py \
-    --model_path "checkpoints/exposure_old.pkl" \
-    --input_dir /local/mnt/workspace/ruodcui/code/adaptive_3dlut/data/BAID512/input/ \
-    --output_dir $output_dir \
-    --prompt "exposure control" \
-    --exposure $exposure
-done
 ```
 
 ## 🙏 Acknowledgements
