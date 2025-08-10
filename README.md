@@ -63,6 +63,12 @@ CUDA_VISIBLE_DEVICES=3 ../miniconda3/envs/img2img-turbo/bin/python src/inference
   --output_dir fusion_output \
   --prompt "exposure control"
 ```
+The fake_HDR directory contains several subfolders, each representing images with different exposure levels.
+You can configure these subfolders in `src/inference.py` by modifying the following line:
+```python
+EXPOSURE_FOLDERS = ['0.2', '0.5', '0.8', 'input']
+```
+Using more exposure levels generally leads to better results, but it will also increase computational cost.
 
 ## 🙏 Acknowledgements
 

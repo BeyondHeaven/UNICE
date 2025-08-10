@@ -7,6 +7,9 @@ from tqdm import tqdm
 from pix2pix_turbo import Pix2Pix_Turbo  # Assuming Pix2Pix_Turbo is the model class
 import torchvision.transforms.functional as F
 
+EXPOSURE_FOLDERS = ['0.2', '0.5', '0.8', 'input']
+
+
 def process_image_stack(image_stack, model, output_dir, img_name, prompt):
     """
     Process an image stack using the provided model.
@@ -30,6 +33,7 @@ def process_image_stack(image_stack, model, output_dir, img_name, prompt):
         # Save the output image using the original image name
         output_pil.save(os.path.join(output_dir, img_name))
 
+
 def get_image_names(input_dir, txt_file=None):
     """
     Get the list of image names from the directory or a txt file.
@@ -46,10 +50,11 @@ def get_image_names(input_dir, txt_file=None):
         with open(txt_file, 'r') as f:
             img_names = [line.strip() for line in f if line.strip().endswith('.jpg')]
     else:
-        # List image names from the directory
-        exposure_folders = ['0.2', '0.5', '0.8']
-        img_names = [img for img in os.listdir(os.path.join(input_dir, exposure_folders[0])) if img.endswith('.jpg')]
+        # List image names from the first exposure folder
+        first_exposure_dir = os.path.join(input_dir, EXPOSURE_FOLDERS[0])
+        img_names = [img for img in os.listdir(first_exposure_dir) if img.endswith('.jpg')]
     return img_names
+
 
 def get_image_stacks_and_process(input_dir, model, output_dir, prompt, txt_file=None, max_images=None):
     """
@@ -66,8 +71,6 @@ def get_image_stacks_and_process(input_dir, model, output_dir, prompt, txt_file=
     Returns:
     None
     """
-    exposure_folders = ['0.2', '0.5', '0.8']
-
     # Ensure that the transform is consistent with the image preparation in the main code
     T = transforms.Compose([
         transforms.Resize((512, 512)),  # Resize images to a common size
@@ -82,16 +85,17 @@ def get_image_stacks_and_process(input_dir, model, output_dir, prompt, txt_file=
 
     for img_name in tqdm(img_names, desc="Processing image stacks"):
         img_stack = []
-        for exposure in exposure_folders:
+        for exposure in EXPOSURE_FOLDERS:
             img_path = os.path.join(input_dir, exposure, img_name)
             img = Image.open(img_path).convert("RGB")
             img_t = T(img)
             img_t = F.to_tensor(img_t)
             img_stack.append(img_t)
-        img_stack = torch.stack(img_stack, dim=0).unsqueeze(0)  # Add batch dimension [1, 3, 3, 512, 512]
+        img_stack = torch.stack(img_stack, dim=0).unsqueeze(0)  # [1, 3, 3, 512, 512] (batch, exposures, C, H, W)
 
         # Process the image stack using the original image name
         process_image_stack(img_stack, model, output_dir, img_name, prompt)
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
@@ -108,7 +112,7 @@ if __name__ == "__main__":
     os.makedirs(args.output_dir, exist_ok=True)
 
     # Initialize the model
-    model = Pix2Pix_Turbo(pretrained_name=args.model_name, pretrained_path=args.model_path)
+    model = Pix2Pix_Turbo(pretrained_name=args.model_name, pretrained_path=args.model_path, num_images = 4)
     model.set_eval()
 
     # Load and process image stacks from the input directory (or from the txt file if provided)

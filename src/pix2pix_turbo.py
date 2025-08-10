@@ -75,7 +75,7 @@ class ImageFusion(torch.nn.Module):
         return fused_image
 
 class Pix2Pix_Turbo(torch.nn.Module):
-    def __init__(self, pretrained_name=None, pretrained_path=None, ckpt_folder="checkpoints", lora_rank_unet=8, lora_rank_vae=4):
+    def __init__(self, pretrained_name=None, pretrained_path=None, ckpt_folder="checkpoints", lora_rank_unet=8, lora_rank_vae=4, num_images=3):
         super().__init__()
         self.tokenizer = AutoTokenizer.from_pretrained("stabilityai/sd-turbo", subfolder="tokenizer")
         self.text_encoder = CLIPTextModel.from_pretrained("stabilityai/sd-turbo", subfolder="text_encoder").cuda()
@@ -92,7 +92,7 @@ class Pix2Pix_Turbo(torch.nn.Module):
         vae.decoder.ignore_skip = False
         unet = UNet2DConditionModel.from_pretrained("stabilityai/sd-turbo", subfolder="unet")
 
-        self.fusion = ImageFusion()
+        self.fusion = ImageFusion(num_images)
 
         if pretrained_path is not None:
             target_modules_vae = ["conv1", "conv2", "conv_in", "conv_shortcut", "conv", "conv_out",
